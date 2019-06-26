@@ -320,6 +320,9 @@ private:
         // check whether this order_id is present during cancel order there is a possiblility that this order could have been closed
         if (order_itr != orders.end())
         {
+          // if the matching order is also placed by the same user then do not allow matching
+          eosio_assert(ord_user_name != order_itr->user_name, "User cannot place opposite orders");
+
           // if the received order is greater than the order in the queue
           transact_qty = std::min(ord_pend_qty, order_itr->pend_qty);
 
