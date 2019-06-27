@@ -319,12 +319,23 @@ public:
     }
   }
 
-  void day_close(const uint64_t &item_id)
+  void day_close(const uint64_t &item_id, const uint16_t &market_price)
   {
     auto itr = find_item(item_id);
     if(itr->open_state != DAY_CLOSED)
     {
       items.modify(itr,self,[&](auto &item){
+
+        // market price should be within the daily price change range
+        int16_t change;
+        change = (int16_t)item.prev_close_price - (int16_t)market_price;
+
+        if(change < MIN_DAILY_PRICE_CHANGE || change > MAX_DAILY_PRICE_CHANGE)
+        {
+          eosio_assert(false, "Invalid market price set");
+        }
+        
+        item.market_price = market_price;
         item.day_close = item.market_price;
         item.open_state = DAY_CLOSED;
       });

@@ -189,13 +189,18 @@ class [[eosio::contract]] jouleapp: public contract{
       }
     }
 
+    struct item_day_close_price{
+      uint64_t item_id;
+      uint16_t market_price;
+    };
+
     [[eosio::action]]
-    void itemdayclose(const std::vector<uint64_t> &item_ids)
+    void itemdayclose(const std::vector<item_day_close_price> &item_ids)
     {
       require_auth(jouleappadmn);
       for(int index = 0; index < item_ids.size(); index++)
       {
-        item_controller.day_close(item_ids[index]);
+        item_controller.day_close(item_ids[index].item_id, item_ids[index].market_price);
       }
     }
 

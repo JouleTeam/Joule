@@ -489,6 +489,8 @@ public:
     eosio_assert(qty > 0, "Qty should be greater than 0");
 
     eosio_assert((price > 0 && price <= 1000), "Price should be in the range of 1 to 1000");
+
+    eosio_assert((position_type == 1 || position_type == -1), "Invalid position_type, can be only 1 or -1");
     // variables used for place order
 
     item_table::const_iterator ord_item_itr = item_controller.find_item(item_id);
