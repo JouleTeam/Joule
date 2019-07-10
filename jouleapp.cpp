@@ -243,10 +243,31 @@ class [[eosio::contract]] jouleapp: public contract{
     }
 
     [[eosio::action]]
+    void trxreceipt(name user_name,uint64_t id,uint64_t item_id,uint64_t order_id,
+                    uint16_t price,uint32_t qty,uint32_t date_time, int8_t pos_type)
+    {
+      require_auth(get_self());
+      require_recipient(user_name);
+    }
+
+    [[eosio::action]]
     void delitemtrans(uint64_t item_id, uint16_t count)
     {
       require_auth(jouleappadmn);
-      order_controller.delete_transactions(item_id,count);
+      auto index = order_controller.get_transactions_item_index();
+      auto it = index.find(item_id);
+      while(it != index.end() && count > 0)
+      {
+        action(
+          permission_level{get_self(),"active"_n},
+          get_self(),
+          "trxreceipt"_n,
+          std::make_tuple(it->user_name,it->id,it->item_id,it->order_id,it->price,it->qty,it->date_time,it->pos_type)
+        ).send();
+
+        it = index.erase(it);
+        count--;
+      }
     }
 
     [[eosio::action]]
@@ -299,4 +320,4 @@ class [[eosio::contract]] jouleapp: public contract{
 EOSIO_DISPATCH_CUSTOM(jouleapp,
 (placeorder)(cancelorder)(transfer)(withdraw)\
 (additem)(modifyitem)(addcategory)(modcategory)(creatportfol)\
-(dayopen)(dayclose)(itemdayopen)(itemdayclose)(admcanorder)(marktomarket)(removeitem)(remcategory)(admininfo)(delitemtrans)(delitemusrpf))
+(dayopen)(dayclose)(itemdayopen)(itemdayclose)(admcanorder)(marktomarket)(removeitem)(remcategory)(admininfo)(trxreceipt)(delitemtrans)(delitemusrpf))

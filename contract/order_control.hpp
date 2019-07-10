@@ -608,6 +608,11 @@ public:
     }
   }
 
+  auto get_transactions_item_index()
+  {
+    return transactions.template get_index<name("bytrxitemid")>();
+  }
+
   void delist_item_usr_pf(item_table::const_iterator item_itr, portfolio_table::const_iterator usr_pf_itr)
   {
     int index_net_pos = usr_pf_itr->find_item(item_itr->id);
