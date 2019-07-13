@@ -337,7 +337,10 @@ public:
         
         item.market_price = market_price;
         item.day_close = item.market_price;
+        item.best_l_price = item.market_price;
+        item.best_s_price = item.market_price;
         item.open_state = DAY_CLOSED;
+        
       });
 
       auto ord_mat_itr = order_match.find(item_id);

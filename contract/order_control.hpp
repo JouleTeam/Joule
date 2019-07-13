@@ -175,7 +175,7 @@ private:
     return result;
   }
 
-  inline void add_transaction(uint64_t order_id, name user_id, uint64_t item_id, uint16_t price, uint32_t qty, int8_t pos_type)
+  inline void add_transaction(uint64_t order_id, name user_id, uint64_t item_id, uint16_t price, uint32_t qty, int8_t pos_type,uint32_t time_stamp)
   {
     transactions.emplace(self, [&](auto &r) {
       r.id = transactions.available_primary_key(); //it is auto incremented value
@@ -184,7 +184,7 @@ private:
       r.item_id = item_id;                          // id of the item
       r.price = price;                              // the order quantity placed
       r.qty = qty;
-      r.date_time = now();
+      r.date_time = time_stamp;
       r.pos_type = pos_type;
     });
   }
@@ -328,7 +328,7 @@ private:
 
           if (transact_qty == order_itr->pend_qty)
           {
-            add_transaction(order_id, order_itr->user_name, order_itr->item_id, order_price, order_itr->total_qty, order_itr->pos_type);
+            add_transaction(order_id, order_itr->user_name, order_itr->item_id, order_price, order_itr->total_qty, order_itr->pos_type,now());
           }
           
           // the marked price of the item is updated and gain calculated
@@ -344,6 +344,7 @@ private:
           {
             orders.modify(order_itr, self, [&](auto &r) {
               r.pend_qty = order_itr->pend_qty - transact_qty;
+              r.date_time = now();
             });
           }
 
@@ -447,7 +448,7 @@ private:
       // create a transaction
       if (match_qty == order_qty || loop_count >= MAX_MATCHING_LOOP)
       {
-        add_transaction(recv_order_id, ord_user_name, ord_item_itr->id, order_price, match_qty, order_position_type);
+        add_transaction(recv_order_id, ord_user_name, ord_item_itr->id, order_price, match_qty, order_position_type,now());
         // if there is no full match but the loop_count exceeded then in this case change the qty to matchQty
         if(loop_count >= MAX_MATCHING_LOOP)
         {
@@ -578,7 +579,7 @@ public:
     if(ord_itr->total_qty != ord_itr->pend_qty)
     {
       add_transaction(ord_itr->id, ord_itr->user_name, ord_itr->item_id, ord_itr->price,
-                      (ord_itr->total_qty - ord_itr->pend_qty), ord_itr->pos_type);
+                      (ord_itr->total_qty - ord_itr->pend_qty), ord_itr->pos_type,ord_itr->date_time);
     }
     
     // delete the order record
