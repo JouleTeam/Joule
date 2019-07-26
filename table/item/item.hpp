@@ -1,5 +1,7 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
+
+#include <eosio/eosio.hpp>
+
 const uint64_t UNIT_MARGIN = 50000;
 const uint64_t UNIT_TRANSACTION_FEE = 500;
 

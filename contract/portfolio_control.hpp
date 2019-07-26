@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../table/portfolio/portfolio.hpp"
+#include "../utils/epoch_time.hpp"
 
 #define CONVERT_CURRENCY(A) (uint64_t)((A)*10000)
+using namespace eosio;
 
 class portfolio_control{
   private:
@@ -43,11 +45,11 @@ class portfolio_control{
       if(check_referrer == true)
       {
         auto itr = portfolios.find(referrer_name.value);
-        eosio_assert(itr != portfolios.end(), "Referrer ID does not exit");
+        check(itr != portfolios.end(), "Referrer ID does not exit");
       }
 
       // check whether this account already exists in EOS
-      eosio_assert(is_account(user_name), "EOS account does not exist");
+      check(is_account(user_name), "EOS account does not exist");
 
       portfolios.emplace(self,[&](auto &portfolio){
         portfolio.user_name = user_name;
@@ -93,7 +95,7 @@ class portfolio_control{
     void deposit(const uint64_t &user_name_value, const uint64_t &fund)
     {
       auto itr = portfolios.find(user_name_value);
-      eosio_assert(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
+      check(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
 
       portfolios.modify(itr,self,[&](auto &portfolio){
         portfolio.avl_fund += fund;
@@ -105,7 +107,7 @@ class portfolio_control{
     {
       // check if the user_name exists
       auto itr = portfolios.find(user_name.value);
-      eosio_assert(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
+      check(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
 
       return itr;
     }
@@ -191,8 +193,8 @@ class portfolio_control{
     void withdraw_fund(const name &user_name,const uint64_t &fund)
     {
       auto itr = portfolios.find(user_name.value);
-      eosio_assert(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
-      eosio_assert(fund <= itr->avl_fund, "Withdraw failed, as available fund is low");
+      check(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
+      check(fund <= itr->avl_fund, "Withdraw failed, as available fund is low");
 
       portfolios.modify(itr,self,[&](auto &portfolio){
         portfolio.avl_fund -= fund;
@@ -203,7 +205,7 @@ class portfolio_control{
     // void delete_usr_pf(const name &user_name)
     // {
     //   auto itr = portfolios.find(user_name.value);
-    //   eosio_assert(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
+    //   check(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
 
     //   portfolios.erase(itr);
     // }

@@ -3,6 +3,9 @@
 #include "../table/item/item.hpp"
 #include "../table/item/category.hpp"
 #include "../table/item/order_match.hpp"
+#include "../utils/epoch_time.hpp"
+
+using namespace eosio;
 
 class item_control
 {
@@ -41,7 +44,7 @@ public:
                     const uint16_t &priority)
   {
     auto itr = categories.find(id);
-    eosio_assert(itr != categories.end(), "Category ID does not exist");
+    check(itr != categories.end(), "Category ID does not exist");
     categories.modify(itr, self, [&](auto &category) {
       category.id = id;
       category.title_english = title_english;
@@ -59,7 +62,7 @@ public:
   {
     //validate category id
     auto itr = categories.find(category_id);
-    eosio_assert(itr != categories.end(), "Category ID does not exist");
+    check(itr != categories.end(), "Category ID does not exist");
 
     //add item
     items.emplace(self, [&](auto &item) {
@@ -101,7 +104,7 @@ public:
                    const std::string &remark, const std::string &demographics)
   {
     auto itr = items.find(item_id);
-    eosio_assert(itr != items.end(), "Item ID does not exists");
+    check(itr != items.end(), "Item ID does not exists");
 
     items.modify(itr, self, [&](auto &item) {
       item.display_id = display_id;
@@ -114,14 +117,14 @@ public:
   item_table::const_iterator find_item(const uint64_t &item_id)
   {
     auto itr = items.find(item_id);
-    eosio_assert(itr != items.end(), "Item ID does not exists");
+    check(itr != items.end(), "Item ID does not exists");
     return itr;
   }
 
   order_match_table::const_iterator find_order_match(const uint64_t &item_id)
   {
     auto itr = order_match.find(item_id);
-    eosio_assert(itr != order_match.end(), "Item ID does not exists");
+    check(itr != order_match.end(), "Item ID does not exists");
     return itr;
   }
 
@@ -332,7 +335,7 @@ public:
 
         if(change < MIN_DAILY_PRICE_CHANGE || change > MAX_DAILY_PRICE_CHANGE)
         {
-          eosio_assert(false, "Invalid market price set");
+          check(false, "Invalid market price set");
         }
         
         item.market_price = market_price;
@@ -354,18 +357,18 @@ public:
   {
     //validate category id
     auto itr = categories.find(id);
-    eosio_assert(itr != categories.end(), "Category ID does not exist");
+    check(itr != categories.end(), "Category ID does not exist");
     categories.erase(itr);
   }
 
   void remove_item(const uint64_t &item_id)
   {
     auto itr = items.find(item_id);
-    eosio_assert(itr != items.end(), "Item ID does not exists");
+    check(itr != items.end(), "Item ID does not exists");
     items.erase(itr);
 
     auto ord_mat_itr = order_match.find(item_id);
-    eosio_assert(ord_mat_itr != order_match.end(), "Item ID does not exists");
+    check(ord_mat_itr != order_match.end(), "Item ID does not exists");
     order_match.erase(ord_mat_itr);
   }
 

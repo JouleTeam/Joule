@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../table/admin/admin.hpp"
+#include "../utils/epoch_time.hpp"
+
+using namespace eosio;
 
 class admin_control{
   private:

@@ -1,5 +1,6 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
+
+#include <eosio/eosio.hpp>
 
 enum category_type
 {

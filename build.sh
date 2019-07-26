@@ -1,1 +1,1 @@
-eosio-cpp -o jouleapp.wasm jouleapp.cpp
+eosio-cpp -I . -o jouleapp.wasm jouleapp.cpp

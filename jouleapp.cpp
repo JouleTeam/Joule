@@ -1,7 +1,8 @@
 #include <vector>
 #include <string>
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/asset.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+
 
 using namespace eosio;
 
@@ -9,6 +10,7 @@ using namespace eosio;
 #include "contract/portfolio_control.hpp"
 #include "contract/order_control.hpp"
 #include "contract/admin_control.hpp"
+#include "utils/epoch_time.hpp"
 
 const name jouleappadmn = "jouleappadmn"_n;
 const name jouleaccount = "jouleaccount"_n;
@@ -16,7 +18,7 @@ const name joulecoinjul = "joulecoinjul"_n;
 const char* jouleSymbol = "JUL";
 
 
-class [[eosio::contract]] jouleapp: public contract{
+class [[eosio::contract()]] jouleapp: public contract{
   private:
     item_control item_controller;
     portfolio_control portfolio_controller;
@@ -68,9 +70,11 @@ class [[eosio::contract]] jouleapp: public contract{
         return;
       }
 
-     // eosio_assert(transfer.quantity.symbol == S(4, "JUL"),"Token Must be JUL");
-      eosio_assert(transfer.quantity.is_valid(), "Invalid token transfer");
-      eosio_assert(transfer.quantity.amount > 0, "Quantity must be positive");
+      // check if the amount is from the joule account then update the datetime field
+
+     // check(transfer.quantity.symbol == S(4, "JUL"),"Token Must be JUL");
+      check(transfer.quantity.is_valid(), "Invalid token transfer");
+      check(transfer.quantity.amount > 0, "Quantity must be positive");
 
       //deposit the amount to the account
       portfolio_controller.deposit(transfer.from,transfer.quantity.amount);

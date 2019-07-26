@@ -2,12 +2,14 @@
 
 #include "../table/order/order.hpp"
 #include "../table/order/transaction.hpp"
+#include "../utils/epoch_time.hpp"
 
 #include "item_control.hpp"
 #include "portfolio_control.hpp"
 #include "admin_control.hpp"
 
 const uint8_t MAX_MATCHING_LOOP = 20;
+using namespace eosio;
 
 class order_control
 {
@@ -44,7 +46,7 @@ private:
 
   uint64_t subtract_assert(const uint64_t &x, const uint64_t &y,const char *assert_msg)
   {
-    eosio_assert((x >= y),assert_msg);
+    check((x >= y),assert_msg);
     return (x-y);
   }
   
@@ -61,7 +63,7 @@ private:
 
     sum_of_open_order_fund += (order_qty * UNIT_MARGIN);
 
-    eosio_assert(sum_of_open_order_fund < (avl_fund + on_order_fund + itr_usr_pf->margin_fund),
+    check(sum_of_open_order_fund < (avl_fund + on_order_fund + itr_usr_pf->margin_fund),
                  "Order failed, as funds not available or more open orders in your account");
 
     int index_portfolio_net_pos;
@@ -80,7 +82,7 @@ private:
 
     if (margin_change >= 0 && margin_change > itr_usr_pf->avl_fund)
     {
-      eosio_assert(false, "Order failed, as funds not available");
+      check(false, "Order failed, as funds not available");
     }
 
     if (margin_change > 0)
@@ -321,7 +323,7 @@ private:
         if (order_itr != orders.end())
         {
           // if the matching order is also placed by the same user then do not allow matching
-          eosio_assert(ord_user_name != order_itr->user_name, "User cannot place opposite orders");
+          check(ord_user_name != order_itr->user_name, "User cannot place opposite orders");
 
           // if the received order is greater than the order in the queue
           transact_qty = std::min(ord_pend_qty, order_itr->pend_qty);
@@ -484,26 +486,26 @@ public:
   void place_order(const uint64_t &item_id, const name &user_name,const uint16_t &price,
                   const int8_t &position_type,const uint32_t &qty)
   {
-    eosio_assert((admin_controller.is_day_open() == 1), "Trading is not open now");
+    check((admin_controller.is_day_open() == 1), "Trading is not open now");
 
     // quantity should be greater than 0
-    eosio_assert(qty > 0, "Qty should be greater than 0");
+    check(qty > 0, "Qty should be greater than 0");
 
-    eosio_assert((price > 0 && price <= 1000), "Price should be in the range of 1 to 1000");
+    check((price > 0 && price <= 1000), "Price should be in the range of 1 to 1000");
 
-    eosio_assert((position_type == 1 || position_type == -1), "Invalid position_type, can be only 1 or -1");
+    check((position_type == 1 || position_type == -1), "Invalid position_type, can be only 1 or -1");
     // variables used for place order
 
     item_table::const_iterator ord_item_itr = item_controller.find_item(item_id);
     open_interest = ord_item_itr->open_interest;
-    eosio_assert((ord_item_itr->open_state != DAY_CLOSED),"Trading is not opened for this item");
+    check((ord_item_itr->open_state != DAY_CLOSED),"Trading is not opened for this item");
 
     int16_t change;
     change = (int16_t)ord_item_itr->prev_close_price - (int16_t)price;
 
     if(change < MIN_DAILY_PRICE_CHANGE || change > MAX_DAILY_PRICE_CHANGE)
     {
-      eosio_assert(false, "Order failed, as order price is not in the range of daily price change");
+      check(false, "Order failed, as order price is not in the range of daily price change");
     }
 
     order_match_table::const_iterator order_match_itr = item_controller.find_order_match(item_id);
@@ -540,7 +542,7 @@ public:
   order_table::const_iterator find_order(const uint64_t &order_id)
   {
     auto itr = orders.find(order_id);
-    eosio_assert(itr != orders.end(), "Order ID does not exists");
+    check(itr != orders.end(), "Order ID does not exists");
     return itr;
   }
 
@@ -619,7 +621,7 @@ public:
     int index_net_pos = usr_pf_itr->find_item(item_itr->id);
     if(index_net_pos != -1)
     {
-      eosio_assert(usr_pf_itr->net_pos[index_net_pos].marked_price == item_itr->market_price, "Mark to Market of this user is not done");
+      check(usr_pf_itr->net_pos[index_net_pos].marked_price == item_itr->market_price, "Mark to Market of this user is not done");
       uint64_t margin_fund = usr_pf_itr->margin_fund;
       margin_fund = subtract_assert(margin_fund,(abs(usr_pf_itr->net_pos[index_net_pos].position) * UNIT_MARGIN),
                                     "Error in calculation of margin_fund in delist_item_usr_pf");

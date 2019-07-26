@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eosiolib/eosio.hpp>
+#include <eosio/eosio.hpp>
 
 /** old user portfolio table used for migration */
 typedef uint64_t account_name;

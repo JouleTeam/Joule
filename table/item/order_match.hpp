@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eosiolib/eosio.hpp>
+#include <eosio/eosio.hpp>
 
 struct price_ord_match_st{
   uint16_t price;

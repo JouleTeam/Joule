@@ -1,5 +1,5 @@
 #pragma once
-#include <eosiolib/eosio.hpp>
+#include <eosio/eosio.hpp>
 
 struct [[eosio::table]] admin_info_st{
   uint64_t tot_fund_deposited;
