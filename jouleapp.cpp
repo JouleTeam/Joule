@@ -25,13 +25,6 @@ class [[eosio::contract()]] jouleapp: public contract{
     order_control order_controller;
     admin_control admin_controller;
 
-    struct st_transfer {
-      account_name from;
-      account_name to;
-      asset        quantity;
-      std::string  memo;
-    };
-
 
   public:
     jouleapp(name receiver,name code, datastream<const char*> ds) : 
@@ -57,29 +50,33 @@ class [[eosio::contract()]] jouleapp: public contract{
       order_controller.cancel_order(ord_itr);
     }
 
-    void transfer(uint64_t sender,uint64_t receiver)
+
+    [[eosio::on_notify("joulecoinjul::transfer")]]
+    void deposit(name from, name to, eosio::asset quantity, std::string memo)
     {
-      const auto transfer = unpack_action_data<st_transfer>();
-      if (transfer.from == _self.value || transfer.to != _self.value) {
+      if (to != get_self() || from == get_self())
+      {
         // this is an outgoing transfer, do nothing
         return;
       }
 
       // don't do anything on transfers from our admin account
-      if (transfer.from == jouleappadmn.value) {
+      if (from == jouleappadmn) {
         return;
       }
 
-      // check if the amount is from the joule account then update the datetime field
+      check(quantity.amount > 0, "Qty should be greater than 0");
+      check(quantity.symbol == symbol(jouleSymbol,4), "Invalid token symbol.");
 
-     // check(transfer.quantity.symbol == S(4, "JUL"),"Token Must be JUL");
-      check(transfer.quantity.is_valid(), "Invalid token transfer");
-      check(transfer.quantity.amount > 0, "Quantity must be positive");
+      if(from == jouleaccount) {
+        // change the from account name to the one provided in the memo
+        from = name(memo);
+      }
 
       //deposit the amount to the account
-      portfolio_controller.deposit(transfer.from,transfer.quantity.amount);
+      portfolio_controller.deposit(from.value,quantity.amount);
 
-      admin_controller.add_total_fund_deposited(transfer.quantity.amount);
+      admin_controller.add_total_fund_deposited(quantity.amount);
     }
 
     [[eosio::action]]
@@ -294,34 +291,9 @@ class [[eosio::contract()]] jouleapp: public contract{
     // }
 
     // [[eosio::action]]
-    // void upsumopenord(name user_name)
-    // {
-    //   require_auth(jouleappadmn);
-    //   auto itr = portfolio_controller.find(user_name);
-    //   portfolio_controller.update_portfolio_on_order(itr,itr->avl_fund, itr->on_order_fund,0);
-    // }
-
-    // [[eosio::action]]
     // void migrate(uint16_t count)
     // {
     //   require_auth(jouleappadmn);
     //   portfolio_controller.migrate(count);
     // }
 };
-
-#define EOSIO_DISPATCH_CUSTOM(TYPE, MEMBERS) \
-  extern "C" { \
-  void apply(uint64_t receiver, uint64_t code, uint64_t action) { \
-    auto self = receiver; \
-    bool self_action = ((code == self) && (action != "transfer"_n.value)); \
-    bool transfer = ((code == joulecoinjul.value) && (action == "transfer"_n.value)); \
-    if (self_action || transfer) { \
-      switch (action) { EOSIO_DISPATCH_HELPER(TYPE, MEMBERS) } \
-    } \
-  } \
-}
-
-EOSIO_DISPATCH_CUSTOM(jouleapp,
-(placeorder)(cancelorder)(transfer)(withdraw)\
-(additem)(modifyitem)(addcategory)(modcategory)(creatportfol)\
-(dayopen)(dayclose)(itemdayopen)(itemdayclose)(admcanorder)(marktomarket)(removeitem)(remcategory)(admininfo)(trxreceipt)(delitemtrans)(delitemusrpf))
