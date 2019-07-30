@@ -4,6 +4,8 @@
 #include "../utils/epoch_time.hpp"
 
 #define CONVERT_CURRENCY(A) (uint64_t)((A)*10000)
+const uint64_t MIN_FUND_FOR_WITHDRAW = (5000000);
+
 using namespace eosio;
 
 class portfolio_control{
@@ -194,7 +196,12 @@ class portfolio_control{
     {
       auto itr = portfolios.find(user_name.value);
       check(itr != portfolios.end(), "Portfolio of this EOS account does not exist");
-      check(fund <= itr->avl_fund, "Withdraw failed, as available fund is low");
+      uint64_t avl_fund_for_withdraw;
+      
+      check(itr->avl_fund > MIN_FUND_FOR_WITHDRAW, "Withdrawal unsuccessful. A minimum Available balance of 500J is required. \n 提款不成功。可用資金最少結餘為500J。");
+      avl_fund_for_withdraw = itr->avl_fund - MIN_FUND_FOR_WITHDRAW;
+
+      check(fund <= avl_fund_for_withdraw, "Withdrawal unsuccessful. A minimum Available balance of 500J is required. \n 提款不成功。可用資金最少結餘為500J。");
 
       portfolios.modify(itr,self,[&](auto &portfolio){
         portfolio.avl_fund -= fund;
