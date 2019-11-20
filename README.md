@@ -74,7 +74,7 @@ Token Distribution
 The Joule platform will be up and running before tokens are released.
 Some Joule tokens will be given out to new accounts for the early adopters as an incentive for trial.
 Maximum supply of Joule tokens is one trillion. 20% of tokens will be retained for the team. Another 20% of tokens will be reserved for ongoing development and promotion of the platform.
-Joule tokens will be sold in secondary market crypto-exchanges regularly each week. The offered prices will be based on the latest prevailing market prices. The quantity of tokens released each week is proportional to the number of new users signed up during that period, based on an objective formula: tokens released in a period = (1000 JUL x No. of new users)
+Joule tokens will be sold in secondary market crypto-exchanges regularly each week. The offered prices will be based on the latest prevailing market prices. The quantity of tokens released each week is proportional to the number of new users signed up during that period, based on an objective formula: tokens released in a period = (10000 JUL x No. of new users)
 Part of the proceeds from token sales will be used to fund the EOS RAM fees needed for creating new accounts, on top of ongoing development and operating expenses.
 
 Website: www.jouleindex.com
